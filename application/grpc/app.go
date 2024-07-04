@@ -6,7 +6,7 @@ import (
 	"antrein/dd-dashboard-config/model/config"
 	"context"
 
-	pb "github.com/antrein/proto-repository/pb/bc"
+	pb "github.com/antrein/proto-repository/pb/dd"
 	"google.golang.org/grpc"
 )
 

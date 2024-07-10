@@ -3,6 +3,7 @@ package rest
 import (
 	"antrein/dd-dashboard-config/application/common/resource"
 	"antrein/dd-dashboard-config/application/common/usecase"
+	"antrein/dd-dashboard-config/internal/handler/rest/project"
 	"antrein/dd-dashboard-config/model/config"
 	"compress/gzip"
 	"fmt"
@@ -55,6 +56,8 @@ func ApplicationDelegate(cfg *config.Config, uc *usecase.CommonUsecase, rsc *res
 	// routes
 
 	// project
+	projectRoute := project.New(cfg, uc.ProjectUsecase, uc.ConfigUsecase, rsc.Vld)
+	projectRoute.RegisterRoute(router)
 
 	handlerWithMiddleware := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		setupCORS(w)

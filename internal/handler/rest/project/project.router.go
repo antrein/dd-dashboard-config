@@ -35,7 +35,7 @@ func (r *Router) RegisterRoute(app *mux.Router) {
 	app.HandleFunc("/dd/dashboard/project/list", guard.AuthGuard(r.cfg, r.GetListProjects))
 	app.HandleFunc("/dd/dashboard/project/health/{id}", guard.AuthGuard(r.cfg, r.CheckHealthProject))
 	app.HandleFunc("/dd/dashboard/project/detail/{id}", guard.AuthGuard(r.cfg, r.GetProjectDetail))
-	app.HandleFunc("/dd/dashboard/project", guard.AuthGuard(r.cfg, r.CreateProject))
+	app.HandleFunc("/dd/dashboard/project/", guard.AuthGuard(r.cfg, r.CreateProject))
 	app.HandleFunc("/dd/dashboard/project/config", guard.AuthGuard(r.cfg, r.UpdateProjectConfig))
 	app.HandleFunc("/dd/dashboard/project/style", guard.AuthGuard(r.cfg, r.UpdateProjectStyle))
 	app.HandleFunc("/dd/dashboard/project/clear", guard.DefaultGuard(r.ClearAllProjects))

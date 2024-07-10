@@ -216,3 +216,21 @@ func (r *Repository) DeleteInfraProject(client *http.Client, projectId string) e
 	}
 	return nil
 }
+
+func (r *Repository) ClearInfraProject(client *http.Client) error {
+	req, err := http.NewRequest("DELETE", r.cfg.Infra.ManagerURL+"/kube/restart/project", nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("failed to clear project, status code: %d", resp.StatusCode)
+	}
+	return nil
+}

@@ -1,26 +1,30 @@
 package project
 
 import (
+	"antrein/dd-dashboard-config/internal/repository/infra"
 	"antrein/dd-dashboard-config/model/config"
 	"antrein/dd-dashboard-config/model/entity"
 	"context"
 	"database/sql"
+	"fmt"
+	"net/http"
 
 	"github.com/jmoiron/sqlx"
 )
 
 type Repository struct {
-	cfg *config.Config
-	db  *sqlx.DB
+	cfg       *config.Config
+	db        *sqlx.DB
+	infraRepo *infra.Repository
 }
 
-func New(cfg *config.Config, db *sqlx.DB) *Repository {
+func New(cfg *config.Config, db *sqlx.DB, infraRepo *infra.Repository) *Repository {
 	return &Repository{
-		cfg: cfg,
-		db:  db,
+		cfg:       cfg,
+		db:        db,
+		infraRepo: infraRepo,
 	}
 }
-
 func (r *Repository) CreateNewProject(ctx context.Context, req entity.Project) (*entity.Project, error) {
 	tx, err := r.db.BeginTxx(ctx, &sql.TxOptions{
 		Isolation: 2,
@@ -82,4 +86,40 @@ func (r *Repository) GetProjects(ctx context.Context, page int, pageSize int) ([
 	offset := (page - 1) * pageSize
 	err := r.db.SelectContext(ctx, &projects, q, pageSize, offset)
 	return projects, err
+}
+func (r *Repository) ClearAllProjects(ctx context.Context) error {
+	// Start transaction
+	tx, err := r.db.BeginTxx(ctx, &sql.TxOptions{
+		Isolation: sql.LevelDefault, // Using default isolation level for clarity
+		ReadOnly:  false,
+	})
+	if err != nil {
+		return err
+	}
+
+	q1 := `TRUNCATE TABLE configurations`
+	if _, err = tx.ExecContext(ctx, q1); err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return err
+	}
+
+	q2 := `DELETE FROM projects`
+	if _, err = tx.ExecContext(ctx, q2); err != nil {
+		fmt.Println(err)
+		tx.Rollback()
+		return err
+	}
+
+	if err = tx.Commit(); err != nil {
+		return err
+	}
+
+	client := &http.Client{}
+	if err = r.infraRepo.ClearInfraProject(client); err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }

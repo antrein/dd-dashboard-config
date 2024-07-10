@@ -15,9 +15,9 @@ type CommonRepository struct {
 }
 
 func NewCommonRepository(cfg *config.Config, rsc *resource.CommonResource) (*CommonRepository, error) {
-	projectRepo := project.New(cfg, rsc.Db)
 	infraRepo := infra.New(cfg)
 	configRepo := configuration.New(cfg, rsc.Db, infraRepo)
+	projectRepo := project.New(cfg, rsc.Db, infraRepo)
 
 	commonRepo := CommonRepository{
 		ProjectRepo: projectRepo,

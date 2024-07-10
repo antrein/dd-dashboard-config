@@ -137,3 +137,16 @@ func (u *Usecase) CheckHealthProject(ctx context.Context, projectID string) (*dt
 		Healthiness: healthiness,
 	}, nil
 }
+
+func (u *Usecase) ClearProject(ctx context.Context) *dto.ErrorResponse {
+	var errRes dto.ErrorResponse
+	err := u.repo.ClearAllProjects(ctx)
+	if err != nil {
+		errRes = dto.ErrorResponse{
+			Status: 500,
+			Error:  err.Error(),
+		}
+		return &errRes
+	}
+	return nil
+}

@@ -38,6 +38,7 @@ func (r *Router) RegisterRoute(app *mux.Router) {
 	app.HandleFunc("/dd/dashboard/project", guard.AuthGuard(r.cfg, r.CreateProject))
 	app.HandleFunc("/dd/dashboard/project/config", guard.AuthGuard(r.cfg, r.UpdateProjectConfig))
 	app.HandleFunc("/dd/dashboard/project/style", guard.AuthGuard(r.cfg, r.UpdateProjectStyle))
+	app.HandleFunc("/dd/dashboard/project/clear", guard.DefaultGuard(r.ClearAllProjects))
 }
 
 func (r *Router) CreateProject(g *guard.AuthGuardContext) error {
@@ -213,4 +214,19 @@ func (r *Router) CheckHealthProject(g *guard.AuthGuardContext) error {
 	}
 
 	return g.ReturnSuccess(resp)
+}
+
+func (r *Router) ClearAllProjects(g *guard.GuardContext) error {
+	ok := guard.IsMethod(g.Request, "DELETE")
+	if !ok {
+		return g.ReturnError(http.StatusMethodNotAllowed, "Method not allowed")
+	}
+
+	ctx := context.Background()
+	errRes := r.usecase.ClearProject(ctx)
+	if errRes != nil {
+		return g.ReturnError(errRes.Status, errRes.Error)
+	}
+
+	return g.ReturnSuccess("Berhasil clear semua project")
 }

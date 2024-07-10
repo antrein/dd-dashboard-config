@@ -64,8 +64,11 @@ jobs:
 
       - name: Add Config
         run: |
-          jq --arg be_mode "${{ vars.CONFIG_BE_MODE }}" --arg infra_mode "${{ vars.CONFIG_INFRA_MODE }}" \
-          '. + {"be_mode": $be_mode, "infra_mode": $infra_mode}' ./files/secrets/secrets.config.json > ./files/secrets/secrets.tmp.json \
+          jq --arg be_mode "${{ vars.CONFIG_BE_MODE }}" \
+            --arg infra_mode "${{ vars.CONFIG_INFRA_MODE }}" \
+            --arg base_url "${{ vars.BASE_URL }}" \
+            '. + {"be_mode": $be_mode, "infra_mode": $infra_mode, "infra": (.infra + { "manager_url": ("https://infra." + $base_url) })}' \
+            ./files/secrets/secrets.config.json > ./files/secrets/secrets.tmp.json \
           && mv ./files/secrets/secrets.tmp.json ./files/secrets/secrets.config.json
 
       - name: Test secret
@@ -73,7 +76,7 @@ jobs:
           cat ./files/secrets/secrets.config.json
 
       - name: Build and push Docker Image
-        env: 
+        env:
           IMAGE_NAME: ${{ needs.setup-environment.outputs.IMAGE_NAME }}
         run: |
           docker build -t $IMAGE_NAME .
@@ -90,7 +93,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare deployment file
-        env: 
+        env:
           IMAGE_NAME: ${{ needs.setup-environment.outputs.IMAGE_NAME }}
           SHORT_SHA: ${{ needs.setup-environment.outputs.SHORT_SHA }}
         run: |
@@ -141,7 +144,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare deployment file
-        env: 
+        env:
           IMAGE_NAME: ${{ needs.setup-environment.outputs.IMAGE_NAME }}
           SHORT_SHA: ${{ needs.setup-environment.outputs.SHORT_SHA }}
         run: |
@@ -191,7 +194,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Prepare deployment file
-        env: 
+        env:
           IMAGE_NAME: ${{ needs.setup-environment.outputs.IMAGE_NAME }}
           SHORT_SHA: ${{ needs.setup-environment.outputs.SHORT_SHA }}
         run: |
